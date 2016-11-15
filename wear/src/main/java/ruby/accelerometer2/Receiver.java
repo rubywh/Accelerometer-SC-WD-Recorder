@@ -31,10 +31,10 @@ public class Receiver extends WearableListenerService {
     }
 
     public void onMessageReceived(MessageEvent messageEvent) {
-        if (messageEvent.getPath().equals("start")) {
+        if (messageEvent.getPath().equals("/start")) {
             Intent startIntent = new Intent(this, startSenseActivity.class);
             startService(startIntent);
-        } else if (messageEvent.getPath().equals("stop")) {
+        } else if (messageEvent.getPath().equals("/stop")) {
             Intent stopIntent = new Intent(this, startSenseActivity.class);
             stopService(stopIntent);
         }
