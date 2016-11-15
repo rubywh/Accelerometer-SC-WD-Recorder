@@ -18,13 +18,22 @@ import static com.google.android.gms.wearable.DataMap.TAG;
  * Created by ruby__000 on 14/11/2016.
  */
 
-public class DataLayer{
+public class DataLayer {
 
     private GoogleApiClient apiClient;
-    private Context context;
+    public Context context;
     public static DataLayer instance;
 
-    private DataLayer(Context context) {
+
+    public static DataLayer getInstance(Context context) {
+        if (instance == null) {
+            instance = new DataLayer(context.getApplicationContext());
+        }
+
+        return instance;
+    }
+
+    public DataLayer(Context context) {
         this.context = context;
 
         apiClient = new GoogleApiClient.Builder(context)
@@ -33,31 +42,35 @@ public class DataLayer{
         apiClient.connect();
     }
 
-    public void sendForSync(final int accuracy, final long timestamp, final float[] values){
-            //send the data we wish to sync once the client is connected.
-            if(apiClient.isConnected()){
-                //Create a PutDataMapRequest object and set the path of the data item
-                PutDataMapRequest pdmr = PutDataMapRequest.create("/accelerometer");
-                //Obtain a data map that you can set values on.
-                pdmr.getDataMap().putInt("Accuracy", accuracy);
-                pdmr.getDataMap().putLong("Timestamp", timestamp);
-                pdmr.getDataMap().putFloatArray("Values", values);
-                // Obtain PutDataRequest object
-                PutDataRequest request = pdmr.asPutDataRequest();
-                //Request system to create the data
-                Wearable.DataApi.putDataItem(apiClient, request).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-                    @Override
-                    public void onResult(DataApi.DataItemResult dataItemResult) {
-                        if (!dataItemResult.getStatus().isSuccess()) {
-                            Log.v(TAG, "Data Sync Failed");
-                        }else{
-                            Log.v(TAG, "Sending");
+    public void sendForSync(final int accuracy, final long timestamp, final float[] values) {
+
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //send the data we wish to sync once the client is connected.
+                if (apiClient.isConnected()) {
+                    //Create a PutDataMapRequest object and set the path of the data item
+                    PutDataMapRequest pdmr = PutDataMapRequest.create("/accelerometer");
+                    //Obtain a data map that you can set values on.
+                    pdmr.getDataMap().putInt("Accuracy", accuracy);
+                    pdmr.getDataMap().putLong("Timestamp", timestamp);
+                    pdmr.getDataMap().putFloatArray("Values", values);
+                    // Obtain PutDataRequest object
+                    PutDataRequest request = pdmr.asPutDataRequest();
+                    //Request system to create the data
+                    Wearable.DataApi.putDataItem(apiClient, request).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+                        @Override
+                        public void onResult(DataApi.DataItemResult dataItemResult) {
+                            if (!dataItemResult.getStatus().isSuccess()) {
+                                Log.v(TAG, "Data Sync Failed");
+                            } else {
+                                Log.v(TAG, "Sending");
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
-        }
-
+        });
+        t.start();
     }
-
-
+}

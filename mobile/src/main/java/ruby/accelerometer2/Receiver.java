@@ -37,18 +37,9 @@ public class Receiver extends WearableListenerService {
                     long timestamp = dataMap.getLong("timestamp");
                     float[] values = dataMap.getFloatArray("values");
                     Log.d(TAG, "Accelerometer data received: " + Arrays.toString(values));
+                    //todo
                 }
             }
-        }
-    }
-
-    public void onMessageReceived(MessageEvent messageEvent) {
-        if (messageEvent.getPath().equals("/start")) {
-            Intent startIntent = new Intent(this, startSenseActivity.class);
-            startService(startIntent);
-        } else if (messageEvent.getPath().equals("/stop")) {
-            Intent stopIntent = new Intent(this, startSenseActivity.class);
-            stopService(stopIntent);
         }
     }
 }

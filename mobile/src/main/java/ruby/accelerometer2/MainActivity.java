@@ -116,9 +116,9 @@ public class MainActivity extends AppCompatActivity {
         sendNodes("/stop");
     }
 
-public void sendNodes(final String path) {
-    //create a new thread to step through the nodes and send our message.
-    new Thread(new Runnable() {
+
+    public void sendNodes(final String path) {
+    Thread s = new Thread(new Runnable() {
         @Override
         public void run() {
             NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(apiClient).await();
@@ -133,15 +133,17 @@ public void sendNodes(final String path) {
                 });
             }
         }
-    }).start();
+    });
+    s.start();
 }
 
 
 
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
+
+/**
+ * ATTENTION: This was auto-generated to implement the App Indexing API.
+ * See https://g.co/AppIndexing/AndroidStudio for more information.
+ */
 
 
 

@@ -26,6 +26,8 @@ public class Receiver extends WearableListenerService {
                 DataMap dataMap = DataMapItem.fromDataItem(dataEvent.getDataItem()).getDataMap();
                 DataItem item = dataEvent.getDataItem();
                 Log.d(TAG, "DataItem changed: " + dataEvent.getDataItem().getUri());
+
+                //todo
             }
         }
     }
