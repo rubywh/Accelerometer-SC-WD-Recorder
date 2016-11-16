@@ -12,6 +12,9 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+
 import static com.google.android.gms.wearable.DataMap.TAG;
 
 /**
@@ -42,13 +45,21 @@ public class DataLayer {
         apiClient.connect();
     }
 
-    public void sendForSync(final int accuracy, final long timestamp, final float[] values) {
+    private boolean checkConnection() {
+        if (apiClient.isConnected()) {
+            return true;
+        }    ConnectionResult result = apiClient.blockingConnect(15000, TimeUnit.MILLISECONDS);
 
+        return result.isSuccess();
+    }
+
+    public void sendForSync(final int accuracy, final long timestamp, final float[] values) {
+        Log.i(TAG, "Sensor " + Arrays.toString(values));
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 //send the data we wish to sync once the client is connected.
-                if (apiClient.isConnected()) {
+                if (checkConnection()) {
                     //Create a PutDataMapRequest object and set the path of the data item
                     PutDataMapRequest pdmr = PutDataMapRequest.create("/accelerometer");
                     //Obtain a data map that you can set values on.

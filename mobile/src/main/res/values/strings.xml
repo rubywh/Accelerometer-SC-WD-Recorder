@@ -4,4 +4,7 @@
     <string name="button_send">Send</string>
     <string name="button_start">Start</string>
     <string name="button_stop">Stop</string>
+    <string name="title">Sensor Title</string>
+    <string name="accelerometer_values">Getting accelerometer data</string>
+
 </resources>

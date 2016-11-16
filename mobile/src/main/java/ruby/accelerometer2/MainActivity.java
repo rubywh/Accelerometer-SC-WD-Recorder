@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -26,9 +27,7 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
-import java.io.FileOutputStream;
 
-import static android.provider.AlarmClock.EXTRA_MESSAGE;
 import static com.google.android.gms.wearable.DataMap.TAG;
 
 public class MainActivity extends AppCompatActivity {
@@ -42,6 +41,14 @@ public class MainActivity extends AppCompatActivity {
      */
     private GoogleApiClient client;
     private GoogleApiClient apiClient;
+    private Receiver receiver;
+    private TextView currentX, currentY, currentZ;
+/*
+    currentX.setText(Float.toString(values[0]));
+    currentY.setText(Float.toString(values[1]));
+    currentZ.setText(Float.toString(values[2]));
+    */
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +58,8 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // For the main activity, make sure the app icon in the action bar
             // does not behave as a button
-          //`  ActionBar actionBar = getActionBar();
-          //  actionBar.setHomeButtonEnabled(false);
+            //`  ActionBar actionBar = getActionBar();
+            //  actionBar.setHomeButtonEnabled(false);
         }
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -63,6 +70,9 @@ public class MainActivity extends AppCompatActivity {
                 .addApi(Wearable.API)
                 .build();
         apiClient.connect();
+
+        receiver = Receiver.getInstance(this);
+        initialiseViews();
 
     }
 
@@ -82,14 +92,20 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void initialiseViews(){
+        currentX = (TextView) findViewById(R.id.currentX);
+        currentY = (TextView) findViewById(R.id.currentY);
+        currentZ = (TextView) findViewById(R.id.currentZ);
+    }
+
 
     public void onStartClick(View view) {
         sendNodes("/start");
     }
 
-    public void sendForSync(final int accuracy, final long timestamp, final float[] values){
+    public void sendForSync(final int accuracy, final long timestamp, final float[] values) {
         //send the data we wish to sync once the client is connected.
-        if(client.isConnected()){
+        if (client.isConnected()) {
             //Create a PutDataMapRequest object and set the path of the data item
             PutDataMapRequest pdmr = PutDataMapRequest.create("/accelerometer");
             //Obtain a data map that you can set values on.
@@ -104,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onResult(DataApi.DataItemResult dataItemResult) {
                     if (!dataItemResult.getStatus().isSuccess()) {
                         Log.v(TAG, "Data Sync Failed");
-                    }else{
+                    } else {
                         Log.v(TAG, "Sending");
                     }
                 }
@@ -118,36 +134,30 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void sendNodes(final String path) {
-    Thread s = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(apiClient).await();
-            for (Node node : nodes.getNodes()) {
-                Wearable.MessageApi.sendMessage(
-                        apiClient, node.getId(), path, null
-                ).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
-                    @Override
-                    public void onResult(MessageApi.SendMessageResult sendMessageResult) {
-                        Log.d(TAG, "controlMeasurementInBackground(" + path + "): " + sendMessageResult.getStatus().isSuccess());
-                    }
-                });
+        Thread s = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(apiClient).await();
+                for (Node node : nodes.getNodes()) {
+                    Wearable.MessageApi.sendMessage(
+                            apiClient, node.getId(), path, null
+                    ).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
+                        @Override
+                        public void onResult(MessageApi.SendMessageResult sendMessageResult) {
+                            Log.d(TAG, "controlMeasurementInBackground(" + path + "): " + sendMessageResult.getStatus().isSuccess());
+                        }
+                    });
+                }
             }
-        }
-    });
-    s.start();
-}
+        });
+        s.start();
+    }
 
 
-
-
-/**
- * ATTENTION: This was auto-generated to implement the App Indexing API.
- * See https://g.co/AppIndexing/AndroidStudio for more information.
- */
-
-
-
-
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
 
 
     public Action getIndexApiAction() {
@@ -180,5 +190,19 @@ public class MainActivity extends AppCompatActivity {
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
+    }
+
+    protected void onResume() {
+        super.onResume();
+
+        //bus provider here?
+        receiver.startOrStopMeasurement("/start/");
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        receiver.startOrStopMeasurement("/stop/");
     }
 }

@@ -1,12 +1,15 @@
 package ruby.accelerometer2;
 
 import android.app.Activity;
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
@@ -16,7 +19,7 @@ import static ruby.accelerometer2.DataLayer.instance;
  * Created by ruby__000 on 14/11/2016.
  */
 
-public class startSenseActivity extends Activity implements SensorEventListener {
+public class startSenseService extends Service implements SensorEventListener {
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
     private DataLayer d;
@@ -24,8 +27,8 @@ public class startSenseActivity extends Activity implements SensorEventListener 
 
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreate() {
+        super.onCreate();
         d = DataLayer.getInstance(this);
         int notificationId = 001;
         NotificationCompat.Builder notificationBuilder =
@@ -45,12 +48,13 @@ public class startSenseActivity extends Activity implements SensorEventListener 
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         //register the sensor, use context, name and rate at which sensor events are delivered to us.
         senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
-        lastUpdate = System.currentTimeMillis();
+
     }
 
     // invoked every time the built-in sensor detects a change
     @Override
     public void onSensorChanged(SensorEvent event) {
+        lastUpdate = System.currentTimeMillis();
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             int accuracy = event.accuracy;
             long timestamp = event.timestamp;
@@ -76,14 +80,18 @@ public class startSenseActivity extends Activity implements SensorEventListener 
     }
 
 
-    protected void onPause() {
-        super.onPause();
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
         senSensorManager.unregisterListener(this);
     }
 
-    protected void onResume() {
-        super.onResume();
-        senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
 }
