@@ -17,6 +17,7 @@ import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
@@ -25,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static android.R.attr.name;
 import static com.google.android.gms.wearable.DataMap.TAG;
 import static ruby.accelerometer2.R.id.currentX;
 import static ruby.accelerometer2.R.id.currentY;
@@ -42,6 +44,7 @@ public class Receiver extends WearableListenerService {
     public List<Node> nodes;
     public SensFragment sensFragment;
     public static Receiver instance;
+    public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
 
     @Override
     public void onCreate() {
@@ -57,6 +60,9 @@ public class Receiver extends WearableListenerService {
         apiClient.connect();
     }
 
+    public Receiver(){
+
+    }
     public static Receiver getInstance(Context context) {
         if (instance == null) {
             instance = new Receiver(context.getApplicationContext());
@@ -95,57 +101,11 @@ public class Receiver extends WearableListenerService {
                     float[] values = dataMap.getFloatArray("Values");
                     Log.d(TAG, "Accelerometer data received: " + Arrays.toString(values));
                     AccelerometerData accelerometerData = new AccelerometerData(accuracy, timestamp, values);
-
-
+                    Intent intent = new Intent(this, DisplayAccelerometerData.class);
+                    intent.putExtra(EXTRA_MESSAGE, values);
+                    startActivity(intent);
                 }
             }
         }
-    }
-
-
-
-    public void addData(AccelerometerData accelerometerData) {
-        dataPoints.addLast(accelerometerData);
-        if (dataPoints.size() > 1000) {
-            dataPoints.removeFirst();
-        }
-        //bus provider here?
-    }
-
-    public void startOrStopMeasurement(final String path) {
-
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (validateConnection())
-                    nodes = Wearable.NodeApi.getConnectedNodes(apiClient).await().getNodes();
-                for (Node node : nodes) {
-                    Log.i(TAG, "add node " + node.getDisplayName());
-                    Wearable.MessageApi.sendMessage(
-                            apiClient, node.getId(), path, null
-                    ).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
-                        @Override
-                        public void onResult(MessageApi.SendMessageResult sendMessageResult) {
-                            if (!sendMessageResult.getStatus().isSuccess()) {
-                                Log.v(TAG, path + " Measurement Failed");
-                            } else {
-                                Log.v(TAG, path + " Measurement success");
-                            }
-                        }
-                    });
-                }
-            }
-        });
-        t.start();
-    }
-
-
-    private boolean validateConnection() {
-        if (apiClient.isConnected()) {
-            return true;
-        }
-        ConnectionResult result = apiClient.blockingConnect(15000, TimeUnit.MILLISECONDS);
-
-        return result.isSuccess();
     }
 }

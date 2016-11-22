@@ -11,7 +11,6 @@ import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
 
-import static com.google.android.gms.wearable.DataMap.TAG;
 
 /**
  * Created by ruby__000 on 14/11/2016.
@@ -19,16 +18,22 @@ import static com.google.android.gms.wearable.DataMap.TAG;
 
 public class Receiver extends WearableListenerService {
     private DataLayer dataLayer;
+    private static final String TAG = "Receiver";
+    private static final String START_ACTIVITY_PATH = "/start";
+    private static final String STOP_ACTIVITY_PATH = "/stop";
 
     @Override
     public void onCreate() {
         super.onCreate();
-
+        Log.i(TAG, "Wear Receiver created");
         dataLayer = dataLayer.getInstance(this);
+
     }
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
+        super.onDataChanged(dataEvents);
+
         for (DataEvent dataEvent : dataEvents) {
             if (dataEvent.getType() == DataEvent.TYPE_CHANGED) {
                 DataMap dataMap = DataMapItem.fromDataItem(dataEvent.getDataItem()).getDataMap();
@@ -41,10 +46,10 @@ public class Receiver extends WearableListenerService {
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         Log.d(TAG, "Received message: " + messageEvent.getPath());
-        if (messageEvent.getPath().equals("/start")) {
+        if (messageEvent.getPath().equals(START_ACTIVITY_PATH)) {
             Intent startIntent = new Intent(this, startSenseService.class);
             startService(startIntent);
-        } else if (messageEvent.getPath().equals("/stop")) {
+        } else if (messageEvent.getPath().equals(STOP_ACTIVITY_PATH)) {
             Intent stopIntent = new Intent(this, startSenseService.class);
             stopService(stopIntent);
         }

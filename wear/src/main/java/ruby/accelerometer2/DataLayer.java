@@ -22,7 +22,7 @@ import static com.google.android.gms.wearable.DataMap.TAG;
  */
 
 public class DataLayer {
-
+    private static final String TAG = "DataLayer";
     private GoogleApiClient apiClient;
     public Context context;
     public static DataLayer instance;

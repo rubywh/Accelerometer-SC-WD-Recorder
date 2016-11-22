@@ -42,13 +42,9 @@ public class MainActivity extends AppCompatActivity {
     private GoogleApiClient client;
     private GoogleApiClient apiClient;
     private Receiver receiver;
-    private TextView currentX, currentY, currentZ;
-/*
-    currentX.setText(Float.toString(values[0]));
-    currentY.setText(Float.toString(values[1]));
-    currentZ.setText(Float.toString(values[2]));
-    */
-
+    private Manager manager;
+    private static final String START_ACTIVITY_PATH = "/start";
+    private static final String STOP_ACTIVITY_PATH = "/stop";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,23 +61,15 @@ public class MainActivity extends AppCompatActivity {
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
-
-        apiClient = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .build();
-        apiClient.connect();
-
         receiver = Receiver.getInstance(this);
-        initialiseViews();
+        manager = Manager.getInstance(this);
 
     }
 
-    /**
-     * Called when the user clicks the Send button
-     */
+
     public void sendMessage(View view) {
         // this is the context, class to which to deliver intent
-
+        Log.i(TAG, "sendMessage");
         Intent intent = new Intent(this, DisplayMessageActivity.class);
         //Add edit text's value to the intent
         EditText editText = (EditText) findViewById(R.id.edit_message);
@@ -92,66 +80,20 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void initialiseViews(){
-        currentX = (TextView) findViewById(R.id.currentX);
-        currentY = (TextView) findViewById(R.id.currentY);
-        currentZ = (TextView) findViewById(R.id.currentZ);
-    }
 
 
     public void onStartClick(View view) {
-        sendNodes("/start");
-    }
+        Log.d(TAG, "onStartClick");
+        manager.startOrStopMeasurement(START_ACTIVITY_PATH);
 
-    public void sendForSync(final int accuracy, final long timestamp, final float[] values) {
-        //send the data we wish to sync once the client is connected.
-        if (client.isConnected()) {
-            //Create a PutDataMapRequest object and set the path of the data item
-            PutDataMapRequest pdmr = PutDataMapRequest.create("/accelerometer");
-            //Obtain a data map that you can set values on.
-            pdmr.getDataMap().putInt("Accuracy", accuracy);
-            pdmr.getDataMap().putLong("Timestamp", timestamp);
-            pdmr.getDataMap().putFloatArray("Values", values);
-            // Obtain PutDataRequest object
-            PutDataRequest request = pdmr.asPutDataRequest();
-            //Request system to create the data
-            Wearable.DataApi.putDataItem(client, request).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-                @Override
-                public void onResult(DataApi.DataItemResult dataItemResult) {
-                    if (!dataItemResult.getStatus().isSuccess()) {
-                        Log.v(TAG, "Data Sync Failed");
-                    } else {
-                        Log.v(TAG, "Sending");
-                    }
-                }
-            });
-        }
     }
 
     public void onStopClick(View view) {
-        sendNodes("/stop");
+
+        Log.i(TAG, "onStartClick");
+        manager.startOrStopMeasurement(STOP_ACTIVITY_PATH);
     }
 
-
-    public void sendNodes(final String path) {
-        Thread s = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(apiClient).await();
-                for (Node node : nodes.getNodes()) {
-                    Wearable.MessageApi.sendMessage(
-                            apiClient, node.getId(), path, null
-                    ).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
-                        @Override
-                        public void onResult(MessageApi.SendMessageResult sendMessageResult) {
-                            Log.d(TAG, "controlMeasurementInBackground(" + path + "): " + sendMessageResult.getStatus().isSuccess());
-                        }
-                    });
-                }
-            }
-        });
-        s.start();
-    }
 
 
     /**
@@ -196,13 +138,13 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
         //bus provider here?
-        receiver.startOrStopMeasurement("/start/");
+        manager.startOrStopMeasurement("/start");
 
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        receiver.startOrStopMeasurement("/stop/");
+        manager.startOrStopMeasurement("/stop");
     }
 }

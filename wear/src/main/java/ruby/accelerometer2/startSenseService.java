@@ -1,6 +1,7 @@
 package ruby.accelerometer2;
 
 import android.app.Activity;
+import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +13,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.util.Log;
 
+import static com.google.android.gms.wearable.DataMap.TAG;
 import static ruby.accelerometer2.DataLayer.instance;
 
 /**
@@ -28,19 +31,16 @@ public class startSenseService extends Service implements SensorEventListener {
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "startSensorService");
         super.onCreate();
         d = DataLayer.getInstance(this);
         int notificationId = 001;
-        NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(this)
-        .setContentTitle("Accelerometer").setContentText("Reading Accelerometer Data...");
-        // Get an instance of the NotificationManager service
-        NotificationManagerCompat notificationManager =
-                NotificationManagerCompat.from(this);
 
-        // Build the notification and issues it with notification manager.
-        notificationManager.notify(notificationId, notificationBuilder.build());
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setContentTitle("Sensor Dashboard");
+        builder.setContentText("Collecting sensor data..");
 
+        startForeground(1, builder.build());
 
         //fetch the system's SensorManager instance. get a reference to a service of the system by passing the name of the service
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -54,6 +54,7 @@ public class startSenseService extends Service implements SensorEventListener {
     // invoked every time the built-in sensor detects a change
     @Override
     public void onSensorChanged(SensorEvent event) {
+        Log.i(TAG, "onSensorChanged");
         lastUpdate = System.currentTimeMillis();
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             int accuracy = event.accuracy;
