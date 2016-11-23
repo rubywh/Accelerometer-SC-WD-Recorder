@@ -6,7 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 /**
- * Created by ruby__000 on 17/11/2016.
+ * Display received accelerometer data on the mobile, updating values whenever these values change
+ * This is started from the onDataChanged method of the Receiver service.
  */
 
 public class DisplayAccelerometerData extends AppCompatActivity {
@@ -24,7 +25,7 @@ public class DisplayAccelerometerData extends AppCompatActivity {
         currentZ.setText(Float.toString(data[2]));
     }
 
-    public void initialiseViews(){
+    public void initialiseViews() {
         currentX = (TextView) findViewById(R.id.currentX);
         currentY = (TextView) findViewById(R.id.currentY);
         currentZ = (TextView) findViewById(R.id.currentZ);

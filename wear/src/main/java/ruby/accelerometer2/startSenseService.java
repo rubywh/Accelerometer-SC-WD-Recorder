@@ -1,6 +1,5 @@
 package ruby.accelerometer2;
 
-import android.app.Activity;
 import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
@@ -9,14 +8,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import static com.google.android.gms.wearable.DataMap.TAG;
-import static ruby.accelerometer2.DataLayer.instance;
 
 /**
  * Created by ruby__000 on 14/11/2016.
@@ -24,10 +19,8 @@ import static ruby.accelerometer2.DataLayer.instance;
 
 public class startSenseService extends Service implements SensorEventListener {
     private SensorManager senSensorManager;
-    private Sensor senAccelerometer;
     private DataLayer d;
-    private long lastUpdate;
-
+    Sensor senAccelerometer;
 
     @Override
     public void onCreate() {
@@ -55,7 +48,7 @@ public class startSenseService extends Service implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         Log.i(TAG, "onSensorChanged");
-        lastUpdate = System.currentTimeMillis();
+        long lastUpdate = System.currentTimeMillis();
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             int accuracy = event.accuracy;
             long timestamp = event.timestamp;
@@ -67,10 +60,9 @@ public class startSenseService extends Service implements SensorEventListener {
 
             long timeAgo = timestamp - lastUpdate;
 
-            if (timeAgo< 200) {
+            if (timeAgo< 3000) {
                 return;
             }
-            lastUpdate = timestamp;
             d.sendForSync(accuracy, timestamp, values);
         }
     }
@@ -85,7 +77,6 @@ public class startSenseService extends Service implements SensorEventListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
         senSensorManager.unregisterListener(this);
     }
 

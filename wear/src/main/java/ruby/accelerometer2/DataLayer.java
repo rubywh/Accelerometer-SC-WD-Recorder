@@ -1,7 +1,6 @@
 package ruby.accelerometer2;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -15,18 +14,26 @@ import com.google.android.gms.wearable.Wearable;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.android.gms.wearable.DataMap.TAG;
-
 /**
  * Created by ruby__000 on 14/11/2016.
  */
 
 public class DataLayer {
     private static final String TAG = "DataLayer";
-    private GoogleApiClient apiClient;
-    public Context context;
     public static DataLayer instance;
+    private Context context;
+    private GoogleApiClient apiClient;
 
+
+    public DataLayer(Context context) {
+        Log.i(TAG, "Created");
+        this.context = context;
+
+        apiClient = new GoogleApiClient.Builder(context)
+                .addApi(Wearable.API)
+                .build();
+        apiClient.connect();
+    }
 
     public static DataLayer getInstance(Context context) {
         if (instance == null) {
@@ -34,15 +41,6 @@ public class DataLayer {
         }
 
         return instance;
-    }
-
-    public DataLayer(Context context) {
-        this.context = context;
-
-        apiClient = new GoogleApiClient.Builder(context)
-                .addApi(Wearable.API)
-                .build();
-        apiClient.connect();
     }
 
     private boolean checkConnection() {

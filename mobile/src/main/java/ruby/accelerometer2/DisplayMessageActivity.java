@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
+/* Not needed for now but here as a reminder of how to display something based on a button click!*/
 public class DisplayMessageActivity extends AppCompatActivity {
 
     @Override

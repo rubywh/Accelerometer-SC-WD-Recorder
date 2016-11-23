@@ -17,10 +17,10 @@ import com.google.android.gms.wearable.WearableListenerService;
  */
 
 public class Receiver extends WearableListenerService {
-    private DataLayer dataLayer;
     private static final String TAG = "Receiver";
     private static final String START_ACTIVITY_PATH = "/start";
     private static final String STOP_ACTIVITY_PATH = "/stop";
+    private DataLayer dataLayer;
 
     @Override
     public void onCreate() {
@@ -46,12 +46,11 @@ public class Receiver extends WearableListenerService {
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         Log.d(TAG, "Received message: " + messageEvent.getPath());
+        Intent myIntent = new Intent(this, startSenseService.class);
         if (messageEvent.getPath().equals(START_ACTIVITY_PATH)) {
-            Intent startIntent = new Intent(this, startSenseService.class);
-            startService(startIntent);
+            startService(myIntent);
         } else if (messageEvent.getPath().equals(STOP_ACTIVITY_PATH)) {
-            Intent stopIntent = new Intent(this, startSenseService.class);
-            stopService(stopIntent);
+            stopService(myIntent);
         }
     }
 }

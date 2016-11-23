@@ -1,50 +1,32 @@
 package ruby.accelerometer2;
 
-import android.app.ActionBar;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.provider.SyncStateContract;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
-import com.google.android.gms.wearable.Wearable;
-
 
 import static com.google.android.gms.wearable.DataMap.TAG;
 
 public class MainActivity extends AppCompatActivity {
     public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
-    private static final String START_ACTIVITY = "/start_activity";
-
-
+    private static final String START_ACTIVITY_PATH = "/start";
+    private static final String STOP_ACTIVITY_PATH = "/stop";
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
-    private GoogleApiClient client;
     private GoogleApiClient apiClient;
     private Receiver receiver;
     private Manager manager;
-    private static final String START_ACTIVITY_PATH = "/start";
-    private static final String STOP_ACTIVITY_PATH = "/stop";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,41 +41,29 @@ public class MainActivity extends AppCompatActivity {
         }
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+        apiClient = new GoogleApiClient.Builder(this)
+                .addApi(AppIndex.API)
+                .build();
 
         receiver = Receiver.getInstance(this);
         manager = Manager.getInstance(this);
 
     }
 
-
-    public void sendMessage(View view) {
-        // this is the context, class to which to deliver intent
-        Log.i(TAG, "sendMessage");
-        Intent intent = new Intent(this, DisplayMessageActivity.class);
-        //Add edit text's value to the intent
-        EditText editText = (EditText) findViewById(R.id.edit_message);
-        String message = editText.getText().toString();
-        //EXTRA_MESSAGE is public key, intents carry key value pairs.
-        intent.putExtra(EXTRA_MESSAGE, message);
-        //start instance of DisplayMessageActivity
-        startActivity(intent);
-    }
-
-
-
+    /* When start button clicked, send start message to manager which will then
+    begin communication with the wearable.
+     */
     public void onStartClick(View view) {
         Log.d(TAG, "onStartClick");
         manager.startOrStopMeasurement(START_ACTIVITY_PATH);
-
     }
-
+    /* When stop button clicked, send stop message to manager which will then
+        end communication with the wearable.
+         */
     public void onStopClick(View view) {
-
-        Log.i(TAG, "onStartClick");
+        Log.d(TAG, "onStartClick");
         manager.startOrStopMeasurement(STOP_ACTIVITY_PATH);
     }
-
 
 
     /**
@@ -117,34 +87,37 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-
+        Log.d(TAG, "onStart");
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+        apiClient.connect();
+        AppIndex.AppIndexApi.start(apiClient, getIndexApiAction());
     }
 
     @Override
     public void onStop() {
+        Log.d(TAG, "onStop");
         super.onStop();
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        AppIndex.AppIndexApi.end(client, getIndexApiAction());
-        client.disconnect();
+        AppIndex.AppIndexApi.end(apiClient, getIndexApiAction());
+        apiClient.disconnect();
     }
-
+    /* Tell manager to resume communication with wearable.
+         */
+    @Override
     protected void onResume() {
+        Log.d(TAG, "onResume");
         super.onResume();
-
-        //bus provider here?
-        manager.startOrStopMeasurement("/start");
-
+        manager.startOrStopMeasurement(START_ACTIVITY_PATH);
     }
-
+    /* Tell manager to stop communication with wearable.
+       */
     @Override
     protected void onPause() {
+        Log.d(TAG, "onPause");
         super.onPause();
-        manager.startOrStopMeasurement("/stop");
+        manager.startOrStopMeasurement(STOP_ACTIVITY_PATH);
     }
 }
