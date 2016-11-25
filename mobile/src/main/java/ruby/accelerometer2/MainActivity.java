@@ -1,18 +1,10 @@
 package ruby.accelerometer2;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
-
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
 
 import static com.google.android.gms.wearable.DataMap.TAG;
 
@@ -24,8 +16,7 @@ public class MainActivity extends AppCompatActivity {
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
-    private GoogleApiClient apiClient;
-    private Receiver receiver;
+    //private Receiver receiver;
     private Manager manager;
 
     @Override
@@ -39,13 +30,9 @@ public class MainActivity extends AppCompatActivity {
             //`  ActionBar actionBar = getActionBar();
             //  actionBar.setHomeButtonEnabled(false);
         }
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        apiClient = new GoogleApiClient.Builder(this)
-                .addApi(AppIndex.API)
-                .build();
 
-        receiver = Receiver.getInstance(this);
+
+        //receiver = Receiver.getInstance(this);
         manager = Manager.getInstance(this);
 
     }
@@ -55,34 +42,18 @@ public class MainActivity extends AppCompatActivity {
      */
     public void onStartClick(View view) {
         Log.d(TAG, "onStartClick");
-        manager.startOrStopMeasurement(START_ACTIVITY_PATH);
+        manager.start();
     }
     /* When stop button clicked, send stop message to manager which will then
         end communication with the wearable.
          */
     public void onStopClick(View view) {
-        Log.d(TAG, "onStartClick");
-        manager.startOrStopMeasurement(STOP_ACTIVITY_PATH);
+        Log.d(TAG, "onStopClick");
+        manager.stop();
     }
 
 
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-
-
-    public Action getIndexApiAction() {
-        Thing object = new Thing.Builder()
-                .setName("Main Page") // TODO: Define a title for the content shown.
-                // TODO: Make sure this auto-generated URL is correct.
-                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
-                .build();
-        return new Action.Builder(Action.TYPE_VIEW)
-                .setObject(object)
-                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
-                .build();
-    }
+/*
 
     @Override
     public void onStart() {
@@ -91,33 +62,32 @@ public class MainActivity extends AppCompatActivity {
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         apiClient.connect();
-        AppIndex.AppIndexApi.start(apiClient, getIndexApiAction());
     }
 
+    */
+/*
     @Override
     public void onStop() {
         Log.d(TAG, "onStop");
         super.onStop();
 
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        AppIndex.AppIndexApi.end(apiClient, getIndexApiAction());
         apiClient.disconnect();
     }
-    /* Tell manager to resume communication with wearable.
-         */
+    */
+
+
     @Override
     protected void onResume() {
         Log.d(TAG, "onResume");
         super.onResume();
-        manager.startOrStopMeasurement(START_ACTIVITY_PATH);
+        manager.start();
     }
-    /* Tell manager to stop communication with wearable.
-       */
+
+
     @Override
     protected void onPause() {
         Log.d(TAG, "onPause");
         super.onPause();
-        manager.startOrStopMeasurement(STOP_ACTIVITY_PATH);
+        manager.stop();
     }
 }

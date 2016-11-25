@@ -10,8 +10,11 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.util.Log;
+import android.util.SparseLongArray;
 
-import static com.google.android.gms.wearable.DataMap.TAG;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 
 /**
  * Created by ruby__000 on 14/11/2016.
@@ -21,12 +24,19 @@ public class startSenseService extends Service implements SensorEventListener {
     private SensorManager senSensorManager;
     private DataLayer d;
     Sensor senAccelerometer;
+    private static final String TAG = "SenseService";
+
 
     @Override
     public void onCreate() {
         Log.d(TAG, "startSensorService");
         super.onCreate();
+
+
         d = DataLayer.getInstance(this);
+
+
+
         int notificationId = 001;
 
         Notification.Builder builder = new Notification.Builder(this);
@@ -48,31 +58,17 @@ public class startSenseService extends Service implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         Log.i(TAG, "onSensorChanged");
-        long lastUpdate = System.currentTimeMillis();
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            int accuracy = event.accuracy;
-            long timestamp = event.timestamp;
-            float[] values = event.values;
-            // Movement
-            float x = values[0];
-            float y = values[1];
-            float z = values[2];
-
-            long timeAgo = timestamp - lastUpdate;
-
-            if (timeAgo< 3000) {
-                return;
+             d.sendForSync(event.accuracy, event.timestamp, event.values);
             }
-            d.sendForSync(accuracy, timestamp, values);
         }
-    }
+
+
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
-
-
 
     @Override
     public void onDestroy() {

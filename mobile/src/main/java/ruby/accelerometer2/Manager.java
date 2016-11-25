@@ -11,6 +11,8 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 
@@ -26,16 +28,10 @@ public class Manager {
     private static final String TAG = "Manager";
     private static Manager instance;
     private List<Node> nodes;
+    private Context context;
    // private Context context;
     private GoogleApiClient apiClient;
-
-    private Manager(Context context) {
-        Log.i(TAG, "connect API");
-        //this.context = context;
-        this.apiClient = new GoogleApiClient.Builder(context)
-                .addApi(Wearable.API)
-                .build();
-    }
+    private ExecutorService e;
 
     public static synchronized Manager getInstance(Context context) {
         if (instance == null) {
@@ -43,15 +39,44 @@ public class Manager {
         }
         return instance;
     }
+    private Manager(Context context) {
+        this.context = context;
+        Log.i(TAG, "connect API");
+        //this.context = context;
+        this.apiClient = new GoogleApiClient.Builder(context)
+                .addApi(Wearable.API)
+                .build();
+        this.e = Executors.newCachedThreadPool();
+    }
+
     /* Called from MainActivity: onStartClick or onStopClick
              */
-    public void startOrStopMeasurement(final String path) {
-        Log.d(TAG, "start or stop measurement");
-        /* Start a new thread
-             */
-        new Thread(new Runnable() {
+
+    public void stop(){
+        e.submit(new Runnable() {
             @Override
             public void run() {
+                measurementS("/stop");
+            }
+        });
+    }
+    public void start(){
+        e.submit(new Runnable() {
+            @Override
+            public void run() {
+                measurementS("/start");
+            }
+        });
+    }
+
+
+    public void measurementS(final String path) {
+        Log.d(TAG, "measurement");
+        /* Start a new thread
+             */
+       // new Thread(new Runnable() {
+           // @Override
+            //public void run() {
                 /* Check for connection to the google API client, attempt connection
                  if not one already */
                 if (checkConnected()) {
@@ -60,25 +85,21 @@ public class Manager {
                         Log.i(TAG, "add node " + node.getDisplayName());
                         Wearable.MessageApi.sendMessage(apiClient, node.getId(), path, null)
                                 .setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
-                            @Override
-                            public void onResult(MessageApi.SendMessageResult sendMessageResult) {
+                                    @Override
+                                    public void onResult(MessageApi.SendMessageResult sendMessageResult) {
                                 /* Return success or fail based on whether the message has been
                                 successfully sent to the wearable */
-                                if (!sendMessageResult.getStatus().isSuccess()) {
-                                    Log.v(TAG, path);
-                                } else {
-                                    Log.v(TAG, path);
-                                }
-                            }
-                        });
+                                        if (!sendMessageResult.getStatus().isSuccess()) {
+                                            Log.v(TAG, path);
+                                        } else {
+                                            Log.v(TAG, path);
+                                        }
+                                    }
+                                });
                     }
-                } else{
-                    Log.i(TAG, "Cannot connect");
                 }
-            }
-        }).start();
+       //  }).start();
     }
-
     /* Called from startOrStopMeasurement to check if there is a connection to the google API client*/
     private boolean checkConnected() {
         if (apiClient.isConnected()) {

@@ -29,25 +29,22 @@ public class Receiver extends WearableListenerService {
     public static Receiver instance;
     public Context context;
 
-    public Receiver(Context context) {
-        this.context = context;
+    public Receiver() {
 
         GoogleApiClient apiClient = new GoogleApiClient.Builder(context)
                 .addApi(Wearable.API)
                 .build();
         apiClient.connect();
     }
-    public Receiver(){
 
-    }
 
-    public static Receiver getInstance(Context context) {
+    /*public static Receiver getInstance(Context context) {
         if (instance == null) {
             instance = new Receiver(context.getApplicationContext());
         }
 
         return instance;
-    }
+    } */
 
     @Override
     public void onCreate() {
@@ -79,7 +76,7 @@ public class Receiver extends WearableListenerService {
                 String path = uri.getPath();
                 Log.d(TAG, "DataItem changed: " + uri);
 
-                /* /accelerometer indicates that the movile receiver has received accelerometer data*/
+                /* /accelerometer indicates that the mobile receiver has received accelerometer data*/
                 if (path.startsWith("/accelerometer")) {
                     /* Unpack the data received */
                     int accuracy = dataMap.getInt("Accuracy");
@@ -89,8 +86,7 @@ public class Receiver extends WearableListenerService {
                     Log.i(TAG, "Accelerometer data received: " + Arrays.toString(values));
                     AccelerometerData accelerometerData = new AccelerometerData(accuracy, timestamp, values);
                     /* Start the DisplayAccelerometerData class that will display the changing
-                    accelerometer data to the mobile screen
-                     */
+                    accelerometer data to the mobile screen */
                     Intent intent = new Intent(this, DisplayAccelerometerData.class);
                     intent.putExtra(EXTRA_MESSAGE, values);
                     startActivity(intent);
