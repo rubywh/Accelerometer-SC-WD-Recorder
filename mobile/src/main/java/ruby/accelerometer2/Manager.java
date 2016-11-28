@@ -33,20 +33,21 @@ public class Manager {
     private GoogleApiClient apiClient;
     private ExecutorService e;
 
+    private Manager(Context context) {
+        this.context = context;
+        Log.i(TAG, "connect API");
+        this.context = context;
+        this.apiClient = new GoogleApiClient.Builder(context)
+                .addApi(Wearable.API)
+                .build();
+        this.e = Executors.newCachedThreadPool();
+    }
+
     public static synchronized Manager getInstance(Context context) {
         if (instance == null) {
             instance = new Manager(context.getApplicationContext());
         }
         return instance;
-    }
-    private Manager(Context context) {
-        this.context = context;
-        Log.i(TAG, "connect API");
-        //this.context = context;
-        this.apiClient = new GoogleApiClient.Builder(context)
-                .addApi(Wearable.API)
-                .build();
-        this.e = Executors.newCachedThreadPool();
     }
 
     /* Called from MainActivity: onStartClick or onStopClick
@@ -109,4 +110,11 @@ public class Manager {
         ConnectionResult result = apiClient.blockingConnect(15000, TimeUnit.SECONDS);
         return result.isSuccess();
     }
+
+    public synchronized void newData(int accuracy, long timestamp, float[] values) {
+        Log.d(TAG, "newData");
+        AccelerometerData data = new AccelerometerData(accuracy, timestamp, values);
+        MainThreadBus.myPost(new Update(data));
+    }
+
 }

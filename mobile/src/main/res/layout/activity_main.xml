@@ -3,15 +3,63 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal">
-    <Button
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
+
+
+    <TextView
+        android:id="@+id/currentX"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:text="0.0"
+        android:textSize="60sp" />
+
+
+    <TextView
+        android:id="@+id/currentY"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:text="0.0"
+        android:textSize="60sp" />
+
+
+    <TextView
+        android:id="@+id/currentZ"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:text="0.0"
+        android:textSize="60sp" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        android:orientation="horizontal"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_weight="2"
+            android:onClick="onStartClick"
         android:text="@string/button_start"
-        android:onClick="onStartClick" />
+            android:textSize="40sp" />
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_weight="2"
+        android:onClick="onStopClick"
         android:text="Stop"
-        android:onClick="onStopClick" />
+        android:textSize="40sp" />
+    </LinearLayout>
 </LinearLayout>

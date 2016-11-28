@@ -10,10 +10,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.util.Log;
-import android.util.SparseLongArray;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 
 
 /**
@@ -21,21 +18,17 @@ import java.util.ArrayList;
  */
 
 public class startSenseService extends Service implements SensorEventListener {
+    private static final String TAG = "SenseService";
+    Sensor senAccelerometer;
     private SensorManager senSensorManager;
     private DataLayer d;
-    Sensor senAccelerometer;
-    private static final String TAG = "SenseService";
-
 
     @Override
     public void onCreate() {
-        Log.d(TAG, "startSensorService");
         super.onCreate();
-
+        Log.d(TAG, "startSensorService");
 
         d = DataLayer.getInstance(this);
-
-
 
         int notificationId = 001;
 
@@ -73,7 +66,9 @@ public class startSenseService extends Service implements SensorEventListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        senSensorManager.unregisterListener(this);
+        if (senSensorManager != null) {
+            senSensorManager.unregisterListener(this);
+        }
     }
 
 

@@ -3,40 +3,31 @@ package ruby.accelerometer2;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataItem;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
 import java.util.Arrays;
 
-import static com.google.android.gms.wearable.DataMap.TAG;
 
 /**
  * Created by ruby__000 on 14/11/2016.
  */
 
 public class Receiver extends WearableListenerService {
-
-    public final static String EXTRA_MESSAGE = "example message";
+    private static final String TAG = "Receiver";
     public static Receiver instance;
     public Context context;
-
-    public Receiver() {
-
-        GoogleApiClient apiClient = new GoogleApiClient.Builder(context)
-                .addApi(Wearable.API)
-                .build();
-        apiClient.connect();
-    }
-
+    LocalBroadcastManager broadcaster;
+    private Manager manager;
+    private Intent intent;
 
     /*public static Receiver getInstance(Context context) {
         if (instance == null) {
@@ -50,6 +41,8 @@ public class Receiver extends WearableListenerService {
     public void onCreate() {
         Log.d(TAG, "onCreate");
         super.onCreate();
+        manager = Manager.getInstance(this);
+
     }
 
     @Override
@@ -64,7 +57,7 @@ public class Receiver extends WearableListenerService {
 
         Log.i(TAG, "Disconnected: " + peer.getDisplayName() + " (" + peer.getId() + ")");
     }
-    /*  */
+
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
         Log.d(TAG, "onDataChanged()");
@@ -87,11 +80,11 @@ public class Receiver extends WearableListenerService {
                     AccelerometerData accelerometerData = new AccelerometerData(accuracy, timestamp, values);
                     /* Start the DisplayAccelerometerData class that will display the changing
                     accelerometer data to the mobile screen */
-                    Intent intent = new Intent(this, DisplayAccelerometerData.class);
-                    intent.putExtra(EXTRA_MESSAGE, values);
-                    startActivity(intent);
+
+                    manager.newData(accuracy, timestamp, values);
                 }
             }
         }
     }
+
 }

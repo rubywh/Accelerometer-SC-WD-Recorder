@@ -13,9 +13,9 @@ import com.google.android.gms.wearable.Wearable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 /**
  * Created by ruby__000 on 14/11/2016.
  */
@@ -23,21 +23,17 @@ import java.util.concurrent.Executors;
 public class DataLayer {
     private static final String TAG = "DataLayer";
     public static DataLayer instance;
-    private ArrayList<Long> lastSensorData;
     private ExecutorService e;
-
-
+    private ArrayList<Long> lastSensorData;
     private Context context;
     private GoogleApiClient apiClient;
-
     private DataLayer(Context context) {
-        Log.i(TAG, "Created");
-        e = Executors.newCachedThreadPool();
         this.context = context;
+        Log.i(TAG, "Created");
         lastSensorData = new ArrayList<Long>();
-        apiClient = new GoogleApiClient.Builder(context)
-                .addApi(Wearable.API)
-                .build();
+        apiClient = new GoogleApiClient.Builder(context).addApi(Wearable.API).build();
+
+        e = Executors.newCachedThreadPool();
     }
 
     public static DataLayer getInstance(Context context) {
@@ -51,8 +47,9 @@ public class DataLayer {
     private boolean checkConnection() {
         if (apiClient.isConnected()) {
             return true;
-        }    ConnectionResult result = apiClient.blockingConnect(15000, TimeUnit.MILLISECONDS);
-
+        }
+        ConnectionResult result = apiClient.blockingConnect(15000, TimeUnit.MILLISECONDS);
+        System.out.println(result);
         return result.isSuccess();
     }
 
@@ -64,11 +61,12 @@ public class DataLayer {
         }
         long lastUpdate = lastSensorData.get(lastSensorData.size()-1);
         long timeAgo = time - lastUpdate;
-        if (lastUpdate != 0) {
-            if (timeAgo < 100) {
-                return;
-            }
-        }
+        //if (lastUpdate != 0) {
+        // if (timeAgo < 100) {
+        //   Log.i(TAG, "return");
+        //   return;
+        //  }
+
         lastSensorData.add(timestamp);
 
 
@@ -81,13 +79,7 @@ public class DataLayer {
     }
 
         public void send(int accuracy, long timestamp, float[] values){
-       // Thread t = new Thread(new Runnable() {
-            //@Override
-            //public void run() {
-                Log.i(TAG, "run");
-                //send the data we wish to sync once the client is connected.
-                if (checkConnection()) {
-                    //Create a PutDataMapRequest object and set the path of the data item
+
                     PutDataMapRequest pdmr = PutDataMapRequest.create("/accelerometer");
                     pdmr.setUrgent();
                     //Obtain a data map that you can set values on.
@@ -98,15 +90,16 @@ public class DataLayer {
                     PutDataRequest request = pdmr.asPutDataRequest();
                     //Request system to create the data
                     Log.i(TAG, "pdmr request");
+            if (checkConnection()) {
                     Wearable.DataApi.putDataItem(apiClient, request).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
                         @Override
                         public void onResult(DataApi.DataItemResult dataItemResult) {
                             Log.v(TAG, "Sending sensor data: " + dataItemResult.getStatus().isSuccess());
+                            System.out.println(apiClient.isConnected());
                         }
                     });
-                } else {
-                    Log.i(TAG, "No connection");
-                }
+
+            }
             }
         //});
        // t.start();
