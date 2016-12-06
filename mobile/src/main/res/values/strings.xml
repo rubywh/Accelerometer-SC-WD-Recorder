@@ -1,10 +1,11 @@
 <resources>
     <string name="app_name">Accelerometer2</string>
     <string name="edit_message">Enter a message</string>
-    <string name="button_send">Send</string>
     <string name="button_start">Start</string>
     <string name="button_stop">Stop</string>
     <string name="title">Sensor Title</string>
+    <string name="text_hint">Enter participant ID</string>
+    <string name="button_save">Save</string>
     <string name="accelerometer_values">Getting accelerometer data</string>
 
 </resources>
