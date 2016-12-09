@@ -2,10 +2,12 @@ package ruby.accelerometer2;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -13,21 +15,17 @@ import com.facebook.stetho.Stetho;
 import com.squareup.otto.Subscribe;
 import com.uphyca.stetho_realm.RealmInspectorModulesProvider;
 
+import java.util.UUID;
+
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
 public class MainActivity extends AppCompatActivity {
-    public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
-    private static final String START_ACTIVITY_PATH = "/start";
-    private static final String STOP_ACTIVITY_PATH = "/stop";
     private static final String TAG = "Main";
     private TextView currentX, currentY, currentZ;
     private Realm realm;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    //private Receiver receiver;
+    private String filename;
+
     private Manager manager;
 
     @Override
@@ -35,7 +33,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         //Declare UI
         setContentView(R.layout.activity_main);
+        //Set each accelerometer value displayed as 0
         initialiseViews();
+
         Stetho.initialize(
                 Stetho.newInitializerBuilder(this)
                         .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
@@ -43,12 +43,11 @@ public class MainActivity extends AppCompatActivity {
                         .build());
 
         Realm.init(this);
+        //Set up a new realm configuration, initialise realm
         RealmConfiguration config = new RealmConfiguration.Builder().build();
         Realm.setDefaultConfiguration(config);
         realm = Realm.getDefaultInstance();
-        // Create the Realm instancejbb33
 
-        //receiver = Receiver.getInstance(this);
         manager = Manager.getInstance(this);
 
 
@@ -61,9 +60,10 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onStartClick");
         manager.start();
         Context context = getApplicationContext();
+
+        //Briefly notify the user that accelerometer data is being read
         CharSequence text = "Reading accelerometer data...";
         int duration = Toast.LENGTH_SHORT;
-
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
     }
@@ -75,11 +75,38 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onStopClick");
         manager.stop();
         Context context = getApplicationContext();
+
         CharSequence text = "Stopped reading accelerometer data...";
         int duration = Toast.LENGTH_SHORT;
-
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
+    }
+
+    /* Start the exportData activity to save data in database to files and then clear the database
+     */
+    public void onExportClick(View view) {
+        Log.d(TAG, "onExportClick");
+        Intent intent = new Intent(this, ExportData.class);
+        intent.putExtra("filename", filename);
+        startActivity(intent);
+    }
+
+    /* Construct filename based on user selected age, gender, height and generated UUID
+    * This is passed to the exportData activity so to store each file with the appropriate filename.
+    * */
+    private void makeFilename(String uid, String gender, String age, String pHeight) {
+        Log.d(TAG, "made filename");
+        filename = (uid + "_" + gender + "_" + age + "_" + pHeight);
+    }
+
+    /*Store user entered details that are then used to generate filename*/
+    public void onSaveClick(View view) {
+        Log.d(TAG, "onSaveClick");
+        String uid = UUID.randomUUID().toString();
+        String age = ((EditText) findViewById(R.id.age)).getText().toString();
+        String gender = ((EditText) findViewById(R.id.gender)).getText().toString();
+        String height = ((EditText) findViewById(R.id.height)).getText().toString();
+        makeFilename(uid, gender, age, height);
     }
 
 
@@ -87,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         Log.d(TAG, "onResume");
         super.onResume();
-        // manager.start();
         MainThreadBus.getInstance().register(this);
         realm = Realm.getDefaultInstance();
     }
@@ -117,7 +143,6 @@ public class MainActivity extends AppCompatActivity {
     public void updateUI(float[] s) {
         Log.d(TAG, "UpdateUI");
 
-
         //Update UI here..
         currentX.setText(Float.toString(s[0]));
         currentY.setText(Float.toString(s[1]));
@@ -132,13 +157,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /* A method that acts based on when a new event has been posted on the event bus
+    * i.e. when there is a new reading, update the ui and write to the database
+     */
     @Subscribe
     public void onSampleEvent(Update event) {
+        //Set the X, Y and Z values on the tablet to those received from the watch
         updateUI(event.getData().getValues());
 
         realm.beginTransaction();
         RealmData realmData = realm.createObject(RealmData.class);
         realmData.setTimestamp(event.getData().getTimestamp());
+        //If there are values received
         if (event.getData().getValues().length > 0) {
             realmData.setX(event.getData().getValues()[0]);
         } else {
@@ -159,4 +189,4 @@ public class MainActivity extends AppCompatActivity {
 
         realm.commitTransaction();
     }
-    }
+}

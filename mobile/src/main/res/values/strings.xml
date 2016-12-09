@@ -4,8 +4,12 @@
     <string name="button_start">Start</string>
     <string name="button_stop">Stop</string>
     <string name="title">Sensor Title</string>
-    <string name="text_hint">Enter participant ID</string>
+    <string name="text_hint">ID</string>
+    <string name="text_hintage">Age</string>
+    <string name="text_hintgender">Gender</string>
+    <string name="text_hintheight">Height</string>
     <string name="button_save">Save</string>
     <string name="accelerometer_values">Getting accelerometer data</string>
+    <string name="export">Export</string>
 
 </resources>

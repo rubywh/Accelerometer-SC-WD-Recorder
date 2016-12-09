@@ -12,7 +12,6 @@ import android.os.IBinder;
 import android.util.Log;
 
 
-
 /**
  * Created by ruby__000 on 14/11/2016.
  */
@@ -43,7 +42,7 @@ public class startSenseService extends Service implements SensorEventListener {
         //get accelerometer
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         //register the sensor, use context, name and rate at which sensor events are delivered to us.
-        senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
+        senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
     }
 
@@ -52,10 +51,9 @@ public class startSenseService extends Service implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         Log.i(TAG, "onSensorChanged");
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-             d.sendForSync(event.accuracy, event.timestamp, event.values);
-            }
+            d.sendForSync(event.accuracy, event.timestamp, event.values);
         }
-
+    }
 
 
     @Override

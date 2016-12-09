@@ -18,7 +18,8 @@ import java.util.Arrays;
 
 
 /**
- * Created by ruby__000 on 14/11/2016.
+ * A wearable listener service that receives incoming watch accelerometer data, unpacks it and
+ * passes on accordingly such that other classes handle its usage and storage.
  */
 
 public class Receiver extends WearableListenerService {
@@ -77,9 +78,6 @@ public class Receiver extends WearableListenerService {
                     float[] values = dataMap.getFloatArray("Values");
                     /* Log the received data*/
                     Log.i(TAG, "Accelerometer data received: " + Arrays.toString(values));
-                    AccelerometerData accelerometerData = new AccelerometerData(accuracy, timestamp, values);
-                    /* Start the DisplayAccelerometerData class that will display the changing
-                    accelerometer data to the mobile screen */
 
                     manager.newData(accuracy, timestamp, values);
                 }

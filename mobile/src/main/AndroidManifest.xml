@@ -28,6 +28,7 @@
 
         </activity>
 
+        <activity android:name=".ExportData"></activity>
 
         <service android:name=".Receiver">
             <intent-filter>

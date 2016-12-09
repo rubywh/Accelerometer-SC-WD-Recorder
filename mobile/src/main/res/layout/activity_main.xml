@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingTop="16dp"
-        android:weightSum="2">
+        android:weightSum="4">
 
         <EditText
             android:id="@+id/ID"
@@ -24,12 +24,43 @@
             android:hint="@string/text_hint"
             android:inputType="text" />
 
-        <Button
+        <EditText
+            android:id="@+id/age"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/button_save"
-            android:textSize="20sp" />
+            android:hint="@string/text_hintage"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/gender"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/text_hintgender"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/height"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/text_hintheight"
+            android:inputType="number" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right">
+
+        <Button
+
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:onClick="onSaveClick"
+            android:text="@string/button_save" />
     </LinearLayout>
 
     <LinearLayout
@@ -37,7 +68,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingBottom="16dp"
-        android:paddingTop="16dp"
+        android:paddingTop="20dp"
         android:weightSum="3">
 
     <TextView
@@ -98,5 +129,23 @@
             android:onClick="onStopClick"
             android:text="@string/button_stop"
             android:textSize="40sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginTop="50dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/export"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:onClick="onExportClick"
+            android:text="@string/export"
+            android:textSize="20sp" />
     </LinearLayout>
 </LinearLayout>

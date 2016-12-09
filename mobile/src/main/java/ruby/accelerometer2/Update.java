@@ -1,7 +1,8 @@
 package ruby.accelerometer2;
 
 /**
- * Created by ruby__000 on 28/11/2016.
+ * A class to represent an event whereby accelerometer readings have changed.
+ * Update events are published and subscribed to on the otto event bus.
  */
 
 public class Update {

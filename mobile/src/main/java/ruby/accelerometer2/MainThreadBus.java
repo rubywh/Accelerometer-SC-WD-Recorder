@@ -7,11 +7,13 @@ import android.util.Log;
 import com.squareup.otto.Bus;
 
 /**
- * Created by ruby__000 on 28/11/2016.
+ * Otto event bus is used here as an efficient way to implement pub/sub such that when there is
+ * an update in acceleromter readings, this is posted on the bus and subscribing methods will
+ * be notified and act accordingly. It is an easy way to communicate between a service
+ * (Receiver.class) and an Activity (MainActivity.class).
  */
 
 
-//send event from Service to Activity with Otto event bus?
 public class MainThreadBus extends Bus {
     private static final String TAG = "Bus";
     private static final Bus BUS = new Bus();
