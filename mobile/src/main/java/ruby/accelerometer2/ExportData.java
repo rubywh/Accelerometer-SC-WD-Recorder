@@ -1,11 +1,17 @@
 package ruby.accelerometer2;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import java.io.BufferedWriter;
+import com.opencsv.CSVWriter;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -21,7 +27,34 @@ import io.realm.RealmResults;
 public class ExportData extends AppCompatActivity {
 
     private static final String TAG = "ExportActivity";
+    // Storage Permissions
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
     private Realm realm;
+
+    /**
+     * Checks if the app has permission to write to device storage
+     * <p>
+     * If the app does not has permission then the user will be prompted to grant permissions
+     *
+     * @param activity
+     */
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,32 +90,50 @@ public class ExportData extends AppCompatActivity {
 
         try {
             Context context = this.getApplicationContext();
-            final File path = context.getFilesDir();
-            final File file = new File(path, filename + ".txt");
-            System.out.println(path);
-            FileWriter fw = new FileWriter(file);
-            BufferedWriter bw = new BufferedWriter(fw);
-            Log.d(TAG, "fw bw created");
+
+            File exportDir = new File(Environment.getExternalStorageDirectory(), "");
+            System.out.println(exportDir);
+
+            if (!exportDir.exists()) {
+                exportDir.mkdirs();
+            }
+            File file = new File(exportDir, filename + ".csv");
+
+            file.createNewFile();
+            CSVWriter csvWrite = new CSVWriter(new FileWriter(file));
+
+            //FileWriter fw = new FileWriter(file);
+            //BufferedWriter bw = new BufferedWriter(fw);
+
+
 
             //Write each realm row as a row in a file (comma separated)
             for (int currentRealmRow = 1; currentRealmRow < totalRows; currentRealmRow++) {
 
                 //Construct the string in a buffer before writing that entire row at once.
-                StringBuffer sb = new StringBuffer(String.valueOf(database.get(currentRealmRow).getTimestamp()));
+                String[] dataArray = new String[4];
+                dataArray[0] = String.valueOf(database.get(currentRealmRow).getTimestamp());
+                dataArray[1] = String.valueOf(database.get(currentRealmRow).getX());
+                dataArray[2] = String.valueOf(database.get(currentRealmRow).getY());
+                dataArray[3] = String.valueOf(database.get(currentRealmRow).getZ());
+
+
+                /* StringBuffer sb = new StringBuffer(String.valueOf(database.get(currentRealmRow).getTimestamp()));
                 sb.append(",");
                 sb.append(String.valueOf(database.get(currentRealmRow).getX()));
                 sb.append(",");
                 sb.append(String.valueOf(database.get(currentRealmRow).getY()));
                 sb.append(",");
                 sb.append(String.valueOf(database.get(currentRealmRow).getZ()));
-                sb.append("\n");
+                sb.append("\n"); */
 
-                System.out.println(sb);
-                bw.write(sb.toString());
+                System.out.println(dataArray);
+                //bw.write(sb.toString());
+                csvWrite.writeNext(dataArray);
             }
-
-            bw.flush();
-            bw.close();
+            csvWrite.close();
+            // bw.flush();
+            //  bw.close();
             Log.d(TAG, "Successful write");
         } catch (IOException e) {
             Log.e(TAG, "IOException, can't write file");
